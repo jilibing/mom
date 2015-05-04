@@ -38,6 +38,6 @@ milk.save(null, {
     //alert('Failed to create new object, with error code: ' + error.description);
     response.error('服务器度假去了: ' + error.description);
   }
-});次
+});
 })
 
