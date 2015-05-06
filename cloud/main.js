@@ -93,7 +93,7 @@ trend.save();
 })
 
 // 记录日记回调
-AV.Cloud.afterSave('Milk', function(request) {
+AV.Cloud.afterSave('Diary', function(request) {
 	var Trend = AV.Object.extend("Trend");
 var trend = new Trend();
 trend.set("publisher", request.object.get('publisher'));
