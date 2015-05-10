@@ -264,12 +264,98 @@ w.save(null, {
 });
 })
 
+
+// 记录辣妈体重
+AV.Cloud.define('saveMomWeight', function(request, response) {
+	var weight = request.params.weight;
+if(weight){
+}else{
+    response.error('还没有输入体重呢！');
+    return;
+}
+
+var user = request.params.publisher;
+if(user){
+}else{
+    response.error('你还没有登录呢！');
+    return;
+}
+
+
+// 创建AV.Object子类.
+// 该语句应该只声明一次
+var Weight = AV.Object.extend("MomWeight");
+
+var query = new AV.Query(Weight);
+
+var date = new Date();
+date.setHours(0);
+date.setMinutes(0);
+date.setSeconds(0);
+query.greaterThanOrEqualTo("updatedAt", date);
+query.first({
+  success: function(w) {
+    //response.success(w);
+    
+    // // 创建该类的一个实例
+    if(w){
+        w.set("publisher", user);
+w.set("weight", weight);
+w.save(null, {
+  success: function(result) {
+    response.success(result);
+  },
+  error: function(milk, error) {;
+    response.error('服务器度假去了2: ' + error.description);
+  }
+});
+    }else{
+        var w = new Weight();
+w.set("publisher", user);
+w.set("weight", weight);
+w.save(null, {
+  success: function(result) {
+    response.success(result);
+  },
+  error: function(w, error) {
+    // Execute any logic that should take place if the save fails.
+    // error is a AV.Error with an error code and description.
+    //alert('Failed to create new object, with error code: ' + error.description);
+    response.error('服务器度假去了2: ' + error.description);
+  }
+});
+    }
+
+
+  },
+  error: function(error) {
+    //response.error('服务器度假去了: ' + error.description);
+    
+var w = new Weight();
+w.set("publisher", user);
+w.set("weight", weight);
+w.save(null, {
+  success: function(result) {
+    response.success(result);
+  },
+  error: function(w, error) {
+    // Execute any logic that should take place if the save fails.
+    // error is a AV.Error with an error code and description.
+    //alert('Failed to create new object, with error code: ' + error.description);
+    response.error('服务器度假去了2: ' + error.description);
+  }
+});
+    
+  }
+});
+})
+
 // 全局
 var trend_diary_type = 1;
 var trend_milk_type = 2;
 var trend_weight_type = 3;
 var trend_height_type = 4;
-
+var trend_mom_weight_type = 5;
 
 // 记录体重回调
 AV.Cloud.afterSave('Weight', function(request){
@@ -281,13 +367,34 @@ trend.set('type', trend_weight_type);
 trend.save();
 })
 
-// 记录体重回调
+// 更新体重回调
 AV.Cloud.afterUpdate('Weight', function(request){
 var Trend = AV.Object.extend("Trend");
 var trend = new Trend();
 trend.set("publisher", request.object.get('publisher'));
 trend.set("content", request.object.get('weight')+'');
 trend.set('type', trend_weight_type);
+trend.save();
+})
+
+
+// 记录辣妈体重回调
+AV.Cloud.afterSave('MomWeight', function(request){
+	var Trend = AV.Object.extend("Trend");
+var trend = new Trend();
+trend.set("publisher", request.object.get('publisher'));
+trend.set("content", request.object.get('weight')+'');
+trend.set('type', trend_mom_weight_type);
+trend.save();
+})
+
+// 更新辣妈体重回调
+AV.Cloud.afterUpdate('MomWeight', function(request){
+var Trend = AV.Object.extend("Trend");
+var trend = new Trend();
+trend.set("publisher", request.object.get('publisher'));
+trend.set("content", request.object.get('weight')+'');
+trend.set('type', trend_mom_weight_type);
 trend.save();
 })
 
