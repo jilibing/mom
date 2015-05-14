@@ -179,6 +179,83 @@ h.save(null, {
 })
 
 
+// 记录头围
+AV.Cloud.define('saveHeadCircum', function(request, response) {
+	var length = request.params.length;
+if(length){
+}else{
+    response.error('还没有输入头围呢！');
+    return;
+}
+
+var user = request.params.publisher;
+if(user){
+}else{
+    response.error('你还没有登录呢！');
+    return;
+}
+
+
+// 创建AV.Object子类.
+// 该语句应该只声明一次
+var HeadCircum = AV.Object.extend("HeadCircum");
+
+var query = new AV.Query(HeadCircum);
+
+var date = new Date();
+date.setHours(0);
+date.setMinutes(0);
+date.setSeconds(0);
+query.greaterThanOrEqualTo("updatedAt", date);
+query.first({
+  success: function(h) {
+    //response.success(result);
+    
+    if(h){
+           // // 创建该类的一个实例
+//var h = new Height();
+h.set("publisher", user);
+h.set("length", length);
+h.save(null, {
+  success: function(result) {
+    response.success(result);
+  },
+  error: function(milk, error) {
+    // Execute any logic that should take place if the save fails.
+    // error is a AV.Error with an error code and description.
+    //alert('Failed to create new object, with error code: ' + error.description);
+    response.error('服务器度假去了: ' + error.description);
+  }
+});
+    }else{
+            
+var h = new HeadCircum();
+h.set("publisher", user);
+h.set("length", length);
+h.save(null, {
+  success: function(result) {
+    response.success(result);
+  },
+  error: function(milk, error) {
+    // Execute any logic that should take place if the save fails.
+    // error is a AV.Error with an error code and description.
+    //alert('Failed to create new object, with error code: ' + error.description);
+    response.error('服务器度假去了: ' + error.description);
+  }
+});
+    }
+ 
+  },
+  error: function(error) {
+    response.error('服务器度假去了: ' + error.description);
+
+    
+  }
+});
+})
+
+
+
 // 记录体重
 AV.Cloud.define('saveWeight', function(request, response) {
 	var weight = request.params.weight;
@@ -356,6 +433,7 @@ var trend_milk_type = 2;
 var trend_weight_type = 3;
 var trend_height_type = 4;
 var trend_mom_weight_type = 5;
+var trend_mom_height_circum_type = 6;
 
 // 记录体重回调
 AV.Cloud.afterSave('Weight', function(request){
@@ -415,5 +493,25 @@ var trend = new Trend();
 trend.set("publisher", request.object.get('publisher'));
 trend.set("content", request.object.get('height')+'');
 trend.set('type', trend_height_type);
+trend.save();
+})
+
+// 记录头围回调
+AV.Cloud.afterSave('HeadCircum', function(request){
+	var Trend = AV.Object.extend("Trend");
+var trend = new Trend();
+trend.set("publisher", request.object.get('publisher'));
+trend.set("content", request.object.get('length')+'');
+trend.set('type', trend_mom_height_circum_type);
+trend.save();
+})
+
+// 更新头围回调
+AV.Cloud.afterUpdate('HeadCircum', function(request){
+var Trend = AV.Object.extend("Trend");
+var trend = new Trend();
+trend.set("publisher", request.object.get('publisher'));
+trend.set("content", request.object.get('length')+'');
+trend.set('type', trend_mom_height_circum_type);
 trend.save();
 })
